@@ -1,0 +1,25 @@
+https://leetcode.com/problems/find-product-recommendation-pairs/
+
+with all_product_pair as
+(
+select PP1.user_id, PP1.product_id as product1_id, PP2.product_id as product2_id
+from ProductPurchases PP1
+join ProductPurchases PP2
+on PP1.user_id = PP2.user_id
+and PP1.product_id < PP2.product_id
+),
+product_pair as
+(
+select product1_id,product2_id, count(*) as customer_count
+from all_product_pair
+group by product1_id,product2_id
+having count(*) >= 3
+)
+
+select PP.product1_id, PP.product2_id, P1.category as product1_category, P2.category as product2_category, customer_count
+from product_pair PP
+join ProductInfo P1 
+on PP.product1_id = P1.product_id
+join ProductInfo P2
+on PP.product2_id = P2.product_id
+order by customer_count desc, product1_id, product2_id
