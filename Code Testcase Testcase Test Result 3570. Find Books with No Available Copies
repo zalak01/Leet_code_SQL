@@ -1,0 +1,16 @@
+https://leetcode.com/problems/find-books-with-no-available-copies/
+
+# Write your MySQL query statement below
+with borrowed_book as
+(
+select book_id, count(book_id) as current_borrowers
+from borrowing_records
+where return_date is null
+group by book_id
+)
+select lb.book_id, title, author,genre,publication_year,current_borrowers
+from library_books  lb 
+join borrowed_book bb
+on lb.book_id = bb.book_id
+and total_copies = current_borrowers
+order by current_borrowers desc, title
