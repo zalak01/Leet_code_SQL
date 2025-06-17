@@ -1,0 +1,25 @@
+https://leetcode.com/problems/find-covid-recovery-patients/
+
+with pos as
+(select test_id, patient_id, min(test_date) as min_positive, result
+from covid_tests 
+where result = "Positive"
+group by patient_id),
+
+neg as
+(select test_id, patient_id, test_date, result
+from covid_tests 
+where result = "Negative"),
+
+join_cte as 
+(
+select p.patient_id,p.min_positive as positive,min(n.test_date) as negative
+from pos p join neg n using (patient_id)
+where n.test_date > p.min_positive
+group by patient_id, p.min_positive
+)
+
+select j.patient_id, patient_name, age, timestampdiff(day,positive,negative) as recovery_time
+from join_cte j join patients p
+on j.patient_id = p.patient_id
+order by recovery_time, patient_name
